@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,44 +10,53 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <div id="app">
-      <header class="topbar">
-        <div class="logo">Bark Studio</div>
-        <div class="status" id="connectionStatus">Offline</div>
+      <header class="topbar" aria-label="Application header">
+        <div class="logo" aria-label="Bark Studio logo">Bark Studio</div>
+        <div class="status" id="connectionStatus" role="status" aria-live="polite">Offline</div>
+        <div class="theme-switch">
+          <label class="switch" aria-label="Toggle theme">
+            <input type="checkbox" id="toggleTheme" />
+            <span class="slider"></span>
+            <span class="switch-label">Light mode</span>
+          </label>
+        </div>
       </header>
 
       <main class="layout">
-        <section class="panel" aria-label="Three.js scene">
-          <canvas id="scene"></canvas>
+        <section class="panel scene-panel" aria-label="Three.js scene">
+          <canvas id="scene" aria-hidden="true"></canvas>
           <div class="scene-overlay">
             <div>
-              <h1>Multidimensional Playground</h1>
+              <h1>Multimodal Playground</h1>
               <p>
-                Text, audio, 2D/3D imagery, volumetrics, and temporal video unified
-                in a single dashboard. Rendered with PBR materials and orbit
-                controls.
+                Text, audio, imagery, volumetrics, and temporal video unified in a single dashboard.
+                Rendered with PBR materials and orbit controls.
               </p>
             </div>
-            <div class="quick-stats" id="sceneStats"></div>
+            <div class="quick-stats" id="sceneStats" aria-live="polite"></div>
           </div>
         </section>
 
         <section class="panel control-grid" aria-label="Inputs">
-          <div class="control-card">
+          <div class="control-card" aria-labelledby="textCardTitle">
             <div class="control-card__header">
-              <h2>Text → Audio/Video</h2>
+              <h2 id="textCardTitle">Text → Audio/Video</h2>
               <span class="pill">1D</span>
             </div>
-            <textarea
-              id="textPrompt"
-              placeholder="Describe the sonic or visual scene you want Bark to build..."
-              rows="4"
-            ></textarea>
+            <label class="field" for="textPrompt">
+              <span>Prompt</span>
+              <textarea
+                id="textPrompt"
+                placeholder="Describe the sonic or visual scene you want Bark to build..."
+                rows="4"
+                aria-required="true"
+              ></textarea>
+            </label>
             <div class="inline-grid">
-              <label class="field">
+              <label class="field" for="videoResolution">
                 <span>Video preset</span>
                 <select id="videoResolution">
                   <option value="3840x2160">4K UHD (3840×2160)</option>
@@ -55,7 +64,7 @@
                   <option value="1920x1080">FHD (1920×1080)</option>
                 </select>
               </label>
-              <label class="field">
+              <label class="field" for="videoFps">
                 <span>Frame rate</span>
                 <select id="videoFps">
                   <option value="30">30 FPS (cinematic realtime)</option>
@@ -65,30 +74,16 @@
               </label>
             </div>
             <div class="inline-grid">
-              <label class="field">
+              <label class="field" for="textTemp">
                 <span>Text temperature</span>
-                <input
-                  id="textTemp"
-                  type="number"
-                  min="0"
-                  max="1.5"
-                  step="0.05"
-                  value="0.7"
-                />
+                <input id="textTemp" type="number" min="0" max="1.5" step="0.05" value="0.7" />
               </label>
-              <label class="field">
+              <label class="field" for="waveformTemp">
                 <span>Waveform temperature</span>
-                <input
-                  id="waveformTemp"
-                  type="number"
-                  min="0"
-                  max="1.5"
-                  step="0.05"
-                  value="0.7"
-                />
+                <input id="waveformTemp" type="number" min="0" max="1.5" step="0.05" value="0.7" />
               </label>
             </div>
-            <label class="field">
+            <label class="field" for="captionText">
               <span>Caption text (defaults to prompt)</span>
               <input id="captionText" type="text" placeholder="Optional closed captions" />
             </label>
@@ -110,20 +105,21 @@
               </label>
             </div>
             <button id="sendPrompt">Synthesize</button>
+            <div id="formErrors" role="alert" aria-live="assertive"></div>
           </div>
 
-          <div class="control-card">
+          <div class="control-card" aria-labelledby="backendCardTitle">
             <div class="control-card__header">
-              <h2>Backend Orchestration</h2>
+              <h2 id="backendCardTitle">Backend Orchestration</h2>
               <span class="pill">API</span>
             </div>
             <div class="hint">Checks health, toggles dry-run mode, and sets output targets.</div>
             <div class="inline-grid">
-              <label class="field">
+              <label class="field" for="outputDir">
                 <span>Output directory</span>
                 <input id="outputDir" type="text" placeholder="outputs/" />
               </label>
-              <label class="field">
+              <label class="field" for="jobPrefix">
                 <span>Optional job prefix</span>
                 <input id="jobPrefix" type="text" placeholder="job-id (auto if blank)" />
               </label>
@@ -141,22 +137,22 @@
             <div class="capability-block" id="capabilityList" aria-live="polite"></div>
           </div>
 
-          <div class="control-card">
+          <div class="control-card" aria-labelledby="audioCardTitle">
             <div class="control-card__header">
-              <h2>Audio &amp; Spectral</h2>
+              <h2 id="audioCardTitle">Audio &amp; Spectral</h2>
               <span class="pill">1D/2D</span>
             </div>
-            <input type="file" id="audioUpload" accept="audio/*" />
+            <input type="file" id="audioUpload" accept="audio/*" aria-label="Upload audio" />
             <div class="hint">Uploads will be converted to Bark-compatible features.</div>
             <button id="previewAudio">Preview Upload</button>
           </div>
 
-          <div class="control-card">
+          <div class="control-card" aria-labelledby="imageCardTitle">
             <div class="control-card__header">
-              <h2>Images &amp; Volumes</h2>
+              <h2 id="imageCardTitle">Images &amp; Volumes</h2>
               <span class="pill">2D/3D</span>
             </div>
-            <input type="file" id="imageUpload" accept="image/*" multiple />
+            <input type="file" id="imageUpload" accept="image/*" multiple aria-label="Upload images" />
             <label class="switch">
               <input type="checkbox" id="enableVolume" />
               <span class="slider"></span>
@@ -165,12 +161,12 @@
             <button id="loadImages">Load Layers</button>
           </div>
 
-          <div class="control-card">
+          <div class="control-card" aria-labelledby="rtcCardTitle">
             <div class="control-card__header">
-              <h2>Temporal &amp; 4D</h2>
+              <h2 id="rtcCardTitle">Temporal &amp; 4D</h2>
               <span class="pill">4D</span>
             </div>
-            <video id="videoPreview" autoplay playsinline muted></video>
+            <video id="videoPreview" autoplay playsinline muted aria-label="WebRTC preview"></video>
             <div class="button-row">
               <button id="connectRtc">Connect WebRTC</button>
               <button id="captureFrame">Capture Frame</button>
@@ -190,13 +186,21 @@
             <div class="response-block__title">Backend response</div>
             <div class="response-block__body" id="responseBody">Waiting for synthesis...</div>
           </div>
-          <div id="log" class="log"></div>
+          <div class="jobs" id="jobList" aria-live="polite"></div>
+          <div id="log" class="log" aria-live="polite"></div>
+          <div class="player" aria-label="Audio player">
+            <div class="player__info">
+              <div>Audio preview</div>
+              <div id="audioMeta" class="hint">Load a job to stream audio.</div>
+            </div>
+            <audio id="audioPlayer" controls preload="none"></audio>
+          </div>
         </section>
       </main>
     </div>
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js"></script>
-    <script type="module" src="./main.js"></script>
+    <div id="toastRoot" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
