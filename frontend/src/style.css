@@ -12,6 +12,18 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+:root.light {
+  color-scheme: light;
+  --bg: #f7f8fb;
+  --panel: #ffffff;
+  --accent: #1570ef;
+  --accent-2: #9b1fe8;
+  --text: #0f172a;
+  --muted: #4b5563;
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -34,6 +46,7 @@ body {
 .topbar {
   display: flex;
   align-items: center;
+  gap: 12px;
   justify-content: space-between;
   padding: 18px 28px;
   border-bottom: 1px solid var(--border);
@@ -42,6 +55,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+:root.light .topbar {
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .logo {
@@ -90,6 +107,10 @@ body {
   display: block;
 }
 
+.scene-panel {
+  min-height: 400px;
+}
+
 .scene-overlay {
   position: absolute;
   inset: 0;
@@ -119,6 +140,10 @@ body {
   min-width: 160px;
   border: 1px solid var(--border);
   text-align: right;
+}
+
+:root.light .quick-stats {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .control-grid {
@@ -184,6 +209,13 @@ button {
   outline: none;
 }
 
+:root.light textarea,
+:root.light input,
+:root.light select,
+:root.light button {
+  background: #fff;
+}
+
 button {
   cursor: pointer;
   background: linear-gradient(135deg, rgba(75, 225, 236, 0.25), rgba(242, 100, 243, 0.2));
@@ -200,7 +232,6 @@ button:active {
   transform: translateY(0);
 }
 
-.video,
 #videoPreview {
   width: 100%;
   background: rgba(255, 255, 255, 0.04);
@@ -346,6 +377,87 @@ input:checked + .slider::before {
   font-size: 14px;
   line-height: 1.4;
   white-space: pre-line;
+}
+
+.jobs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.job-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.2s ease;
+}
+
+.job-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.player {
+  border-top: 1px solid var(--border);
+  padding: 12px 18px 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.player__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#toastRoot {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+}
+
+.toast {
+  background: rgba(12, 15, 23, 0.95);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  min-width: 220px;
+}
+
+.toast--error {
+  border-color: #f28b82;
+  color: #ffd6d0;
+}
+
+.form-errors {
+  color: #f28b82;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
