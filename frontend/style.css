@@ -139,6 +139,31 @@ body {
   backdrop-filter: blur(8px);
 }
 
+.inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field span {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.toggle-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
 .control-card__header {
   display: flex;
   align-items: center;
@@ -147,6 +172,7 @@ body {
 
 textarea,
 input,
+select,
 button {
   width: 100%;
   border-radius: 10px;

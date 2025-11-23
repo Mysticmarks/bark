@@ -46,6 +46,45 @@
               placeholder="Describe the sonic or visual scene you want Bark to build..."
               rows="4"
             ></textarea>
+            <div class="inline-grid">
+              <label class="field">
+                <span>Video preset</span>
+                <select id="videoResolution">
+                  <option value="3840x2160">4K UHD (3840×2160)</option>
+                  <option value="2560x1440">QHD (2560×1440)</option>
+                  <option value="1920x1080">FHD (1920×1080)</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Frame rate</span>
+                <select id="videoFps">
+                  <option value="30">30 FPS (cinematic realtime)</option>
+                  <option value="24">24 FPS</option>
+                  <option value="60">60 FPS</option>
+                </select>
+              </label>
+            </div>
+            <label class="field">
+              <span>Caption text (defaults to prompt)</span>
+              <input id="captionText" type="text" placeholder="Optional closed captions" />
+            </label>
+            <div class="toggle-row">
+              <label class="switch">
+                <input type="checkbox" id="enableCaptions" checked />
+                <span class="slider"></span>
+                <span class="switch-label">Closed captions default ON</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="enableRealtime" checked />
+                <span class="slider"></span>
+                <span class="switch-label">Realtime layered diffusion</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="enableHdAudio" checked />
+                <span class="slider"></span>
+                <span class="switch-label">HD audio (320kbps AAC)</span>
+              </label>
+            </div>
             <button id="sendPrompt">Synthesize</button>
           </div>
 

@@ -1,8 +1,10 @@
+from pathlib import Path
 from typing import Dict, Optional, Sequence, Union
 
 import numpy as np
 
 from .generation import codec_decode, generate_coarse, generate_fine, generate_text_semantic
+from .video import MultimediaResult, VideoGenerationConfig, render_multimodal_mp4
 from .modalities import ControlEvent, ModalityBundle
 
 
@@ -144,3 +146,36 @@ def generate_audio(
     else:
         audio_arr = out
     return audio_arr
+
+
+def generate_multimedia(
+    text: str,
+    output_video: Union[str, Path],
+    video_config: Optional[VideoGenerationConfig] = None,
+    caption_text: Optional[str] = None,
+    history_prompt: Optional[Union[Dict, str]] = None,
+    text_temp: float = 0.7,
+    waveform_temp: float = 0.7,
+    silent: bool = False,
+) -> MultimediaResult:
+    """
+    Generate Bark audio and render a synchronized 4K/30FPS MP4 with captions enabled.
+
+    This helper keeps audio + visual generation in one place so a web or CLI backend
+    can call a single function to return both the video path and its caption track.
+    """
+
+    audio_arr = generate_audio(
+        text=text,
+        history_prompt=history_prompt,
+        text_temp=text_temp,
+        waveform_temp=waveform_temp,
+        silent=silent,
+    )
+    return render_multimodal_mp4(
+        prompt=text,
+        audio_array=audio_arr,
+        output_path=Path(output_video),
+        caption_text=caption_text or text,
+        config=video_config,
+    )
