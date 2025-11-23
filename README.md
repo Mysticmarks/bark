@@ -17,6 +17,10 @@
 
 Bark is a transformer-based text-to-audio model created by [Suno](https://suno.ai). Bark can generate highly realistic, multilingual speech as well as other audio - including music, background noise and simple sound effects. The model can also produce nonverbal communications like laughing, sighing and crying. To support the research community, we are providing access to pretrained model checkpoints, which are ready for inference and available for commercial use.
 
+## 🔭 Omnimodal Roadmap
+- We are exploring extensions that let Bark condition on images, reference audio, and structured control cues alongside text.
+- See the [Omnimodal Bark Expansion Plan](docs/omnimodal_plan.md) for the proposed architecture, APIs, and evaluation milestones.
+
 ## ⚠ Disclaimer
 Bark was developed for research purposes. It is not a conventional text-to-speech model but instead a fully generative text-to-audio model, which can deviate in unexpected ways from provided prompts. Suno does not take responsibility for any output generated. Use at your own risk, and please act responsibly.
 
