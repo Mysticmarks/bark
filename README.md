@@ -21,6 +21,11 @@ Bark is a transformer-based text-to-audio model created by [Suno](https://suno.a
 - We are exploring extensions that let Bark condition on images, reference audio, and structured control cues alongside text.
 - See the [Omnimodal Bark Expansion Plan](docs/omnimodal_plan.md) for the proposed architecture, APIs, and evaluation milestones.
 
+## 🛰️ Multidimensional Studio Frontend
+- A web-based Three.js + WebRTC dashboard lives in [`frontend/`](frontend/) to prototype 1D/2D/3D/4D inputs in a single PBR-styled scene.
+- Open `frontend/index.html` in a modern browser to explore the mock workflow: text prompts, audio uploads, image stacks-to-volume toggles, and live RTC capture previews.
+- The UI logs all actions locally and includes stubs for integrating with a Bark API endpoint (for example, `/api/bark/synthesize`).
+
 ## ⚠ Disclaimer
 Bark was developed for research purposes. It is not a conventional text-to-speech model but instead a fully generative text-to-audio model, which can deviate in unexpected ways from provided prompts. Suno does not take responsibility for any output generated. Use at your own risk, and please act responsibly.
 

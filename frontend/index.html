@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bark Multidimensional Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="logo">Bark Studio</div>
+        <div class="status" id="connectionStatus">Offline</div>
+      </header>
+
+      <main class="layout">
+        <section class="panel" aria-label="Three.js scene">
+          <canvas id="scene"></canvas>
+          <div class="scene-overlay">
+            <div>
+              <h1>Multidimensional Playground</h1>
+              <p>
+                Text, audio, 2D/3D imagery, volumetrics, and temporal video unified
+                in a single dashboard. Rendered with PBR materials and orbit
+                controls.
+              </p>
+            </div>
+            <div class="quick-stats" id="sceneStats"></div>
+          </div>
+        </section>
+
+        <section class="panel control-grid" aria-label="Inputs">
+          <div class="control-card">
+            <div class="control-card__header">
+              <h2>Text → Audio/Video</h2>
+              <span class="pill">1D</span>
+            </div>
+            <textarea
+              id="textPrompt"
+              placeholder="Describe the sonic or visual scene you want Bark to build..."
+              rows="4"
+            ></textarea>
+            <button id="sendPrompt">Synthesize</button>
+          </div>
+
+          <div class="control-card">
+            <div class="control-card__header">
+              <h2>Audio &amp; Spectral</h2>
+              <span class="pill">1D/2D</span>
+            </div>
+            <input type="file" id="audioUpload" accept="audio/*" />
+            <div class="hint">Uploads will be converted to Bark-compatible features.</div>
+            <button id="previewAudio">Preview Upload</button>
+          </div>
+
+          <div class="control-card">
+            <div class="control-card__header">
+              <h2>Images &amp; Volumes</h2>
+              <span class="pill">2D/3D</span>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*" multiple />
+            <label class="switch">
+              <input type="checkbox" id="enableVolume" />
+              <span class="slider"></span>
+              <span class="switch-label">Volume stack</span>
+            </label>
+            <button id="loadImages">Load Layers</button>
+          </div>
+
+          <div class="control-card">
+            <div class="control-card__header">
+              <h2>Temporal &amp; 4D</h2>
+              <span class="pill">4D</span>
+            </div>
+            <video id="videoPreview" autoplay playsinline muted></video>
+            <div class="button-row">
+              <button id="connectRtc">Connect WebRTC</button>
+              <button id="captureFrame">Capture Frame</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Activity">
+          <div class="panel__header">
+            <h2>Activity Stream</h2>
+            <div class="mini-controls">
+              <button id="clearLog">Clear</button>
+              <button id="saveSession">Save Session</button>
+            </div>
+          </div>
+          <div id="log" class="log"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
