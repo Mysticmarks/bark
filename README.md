@@ -37,6 +37,11 @@ Bark was developed for research purposes. It is not a conventional text-to-speec
 * [🌀 Live Examples](https://suno.ai/examples/bark-v0)
 * [❓ FAQ](#-faq)
 
+## 📚 System Reference & Deployment
+- Read the full [System Reference Document (SRD)](docs/system_reference.md) for current architecture, API contracts, diagrams, configuration, deployment topologies, and operational runbooks.
+- Supported features (server-side): FastAPI service with `/api/health`, `/api/capabilities`, and `/api/bark/synthesize`; authenticated+rate-limited requests; bounded queue with background workers; audio/video/captions generation with dry-run planning; optional Three.js/WebRTC frontend targeting the same API.
+- Deployment summary: install dependencies (`pip install .`), set env vars such as `BARK_MODELS_AVAILABLE=true` and optional `BARK_API_KEY`, then launch the server via `python -m bark.server` or `uvicorn bark.server:app --host 0.0.0.0 --port 8000`; mount `outputs/` (or `BARK_OUTPUT_ROOT`) for artifact persistence.
+
 ## 🎧 Demos  
 
 [![Open in Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue.svg)](https://huggingface.co/spaces/suno/bark)
