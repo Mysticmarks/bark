@@ -19,6 +19,7 @@ dependencies = [
     "encodec",
     "funcy",
     "huggingface-hub>=0.14.1",
+    "moviepy",
     "numpy",
     "scipy",
     "tokenizers",

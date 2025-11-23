@@ -81,6 +81,7 @@ function updateStats() {
     `2D: image stacks → volumes`,
     `3D: orbit scene objects`,
     `4D: WebRTC temporal capture`,
+    `Video: UHD MP4 @ 30FPS with captions`,
   ];
   statsEl.innerHTML = stats.map((line) => `<div>${line}</div>`).join('');
 }
@@ -119,18 +120,46 @@ animate();
 
 async function handlePrompt() {
   const text = document.getElementById('textPrompt').value.trim();
+  const resolution = document.getElementById('videoResolution').value.split('x').map(Number);
+  const fps = Number(document.getElementById('videoFps').value);
+  const captionText = document.getElementById('captionText').value.trim() || text;
+  const captionsEnabled = document.getElementById('enableCaptions').checked;
+  const realtime = document.getElementById('enableRealtime').checked;
+  const hdAudio = document.getElementById('enableHdAudio').checked;
   if (!text) {
     log('Please add a prompt before synthesizing.', 'warn');
     return;
   }
 
   log('Queued text prompt for Bark synthesis (mock endpoint).', '1D');
+  log(
+    `Targeting ${resolution[0]}×${resolution[1]} @ ${fps}FPS with ${hdAudio ? 'HD' : 'standard'} audio and captions ${
+      captionsEnabled ? 'ON' : 'OFF'
+    }.`,
+    'video'
+  );
+  if (realtime) {
+    log('Realtime layered diffusion is active to sync imagery with generated audio.', '4D');
+  }
   try {
     // This stub shows how a backend integration could look.
     await fetch('/api/bark/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: text, modalities: ['audio', 'video'] }),
+      body: JSON.stringify({
+        prompt: text,
+        modalities: ['audio', 'video'],
+        video: {
+          resolution,
+          fps,
+          captionsEnabled,
+          captionText,
+          realtimeLayering: realtime,
+          audioBitrate: hdAudio ? '320k' : '160k',
+          codec: 'libx264',
+          audioCodec: 'aac',
+        },
+      }),
     });
     log('Request sent to Bark pipeline.', 'network');
   } catch (err) {
