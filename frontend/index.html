@@ -64,6 +64,30 @@
                 </select>
               </label>
             </div>
+            <div class="inline-grid">
+              <label class="field">
+                <span>Text temperature</span>
+                <input
+                  id="textTemp"
+                  type="number"
+                  min="0"
+                  max="1.5"
+                  step="0.05"
+                  value="0.7"
+                />
+              </label>
+              <label class="field">
+                <span>Waveform temperature</span>
+                <input
+                  id="waveformTemp"
+                  type="number"
+                  min="0"
+                  max="1.5"
+                  step="0.05"
+                  value="0.7"
+                />
+              </label>
+            </div>
             <label class="field">
               <span>Caption text (defaults to prompt)</span>
               <input id="captionText" type="text" placeholder="Optional closed captions" />
@@ -86,6 +110,35 @@
               </label>
             </div>
             <button id="sendPrompt">Synthesize</button>
+          </div>
+
+          <div class="control-card">
+            <div class="control-card__header">
+              <h2>Backend Orchestration</h2>
+              <span class="pill">API</span>
+            </div>
+            <div class="hint">Checks health, toggles dry-run mode, and sets output targets.</div>
+            <div class="inline-grid">
+              <label class="field">
+                <span>Output directory</span>
+                <input id="outputDir" type="text" placeholder="outputs/" />
+              </label>
+              <label class="field">
+                <span>Optional job prefix</span>
+                <input id="jobPrefix" type="text" placeholder="job-id (auto if blank)" />
+              </label>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="dryRun" checked />
+              <span class="slider"></span>
+              <span class="switch-label">Plan only (no heavy generation)</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="renderVideoToggle" />
+              <span class="slider"></span>
+              <span class="switch-label">Render UHD MP4 + captions</span>
+            </label>
+            <div class="capability-block" id="capabilityList" aria-live="polite"></div>
           </div>
 
           <div class="control-card">
@@ -132,6 +185,10 @@
               <button id="clearLog">Clear</button>
               <button id="saveSession">Save Session</button>
             </div>
+          </div>
+          <div class="response-block" id="responseSummary" aria-live="polite">
+            <div class="response-block__title">Backend response</div>
+            <div class="response-block__body" id="responseBody">Waiting for synthesis...</div>
           </div>
           <div id="log" class="log"></div>
         </section>

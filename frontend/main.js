@@ -73,6 +73,10 @@ const statsEl = document.getElementById('sceneStats');
 const logEl = document.getElementById('log');
 const statusEl = document.getElementById('connectionStatus');
 const videoPreview = document.getElementById('videoPreview');
+const capabilityEl = document.getElementById('capabilityList');
+const responseBodyEl = document.getElementById('responseBody');
+const dryRunToggle = document.getElementById('dryRun');
+const renderVideoToggle = document.getElementById('renderVideoToggle');
 let rtcStream;
 
 function updateStats() {
@@ -91,6 +95,63 @@ function log(message, tag = 'info') {
   entry.className = 'log-entry';
   entry.innerHTML = `<span>${message}</span><span class="pill">${tag}</span>`;
   logEl.prepend(entry);
+}
+
+function setConnectionStatus(message, color = 'var(--accent)') {
+  statusEl.textContent = message;
+  statusEl.style.color = color;
+}
+
+async function refreshHealth() {
+  try {
+    const res = await fetch('/api/health');
+    if (!res.ok) throw new Error('Unhealthy');
+    const data = await res.json();
+    setConnectionStatus(`Online · v${data.version}`, 'var(--accent)');
+    log(`Backend heartbeat received at ${data.time}.`, 'network');
+  } catch (err) {
+    setConnectionStatus('Offline', '#f28b82');
+    log('Backend offline — requests will fall back to local stubs.', 'offline');
+  }
+}
+
+function renderCapabilities(data) {
+  if (!capabilityEl) return;
+  if (!data) {
+    capabilityEl.innerHTML = '<div>Capabilities unavailable.</div>';
+    return;
+  }
+
+  const videoPresets = Object.entries(data.video_presets || {})
+    .map(([label, res]) => `<div>${label.toUpperCase()}: ${res[0]}×${res[1]}</div>`)
+    .join('');
+  const audioRates = (data.audio_bitrates || []).join(', ');
+  const notes = (data.notes || []).map((n) => `<div>• ${n}</div>`).join('');
+
+  capabilityEl.innerHTML = `
+    <h3>Live API Capabilities</h3>
+    <div class="capability-grid">
+      <div><strong>Modalities</strong><br/>${(data.modalities || []).join(', ')}</div>
+      <div><strong>Video presets</strong><br/>${videoPresets}</div>
+      <div><strong>Audio</strong><br/>${audioRates}</div>
+      <div><strong>Codecs</strong><br/>Video: ${data.codecs?.video || 'n/a'}<br/>Audio: ${
+    data.codecs?.audio || 'n/a'
+  }</div>
+    </div>
+    <div class="hint" aria-live="polite">${notes}</div>
+  `;
+}
+
+async function loadCapabilities() {
+  try {
+    const res = await fetch('/api/capabilities');
+    if (!res.ok) throw new Error('Unavailable');
+    const data = await res.json();
+    renderCapabilities(data);
+    log('Fetched backend capabilities.', 'network');
+  } catch (err) {
+    renderCapabilities(null);
+  }
 }
 
 function resizeRenderer() {
@@ -117,6 +178,34 @@ function animate() {
 
 updateStats();
 animate();
+refreshHealth();
+loadCapabilities();
+
+function updateResponseSummary(result) {
+  if (!responseBodyEl) return;
+  if (!result) {
+    responseBodyEl.textContent = 'Waiting for synthesis...';
+    return;
+  }
+
+  const artifacts = Object.entries(result.artifacts || {})
+    .filter(([, value]) => Boolean(value))
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+
+  const lines = [
+    `Job: ${result.job_id || 'n/a'}`,
+    `Status: ${result.status || 'unknown'}`,
+    `Modalities: ${(result.plan?.modalities || []).join(', ') || 'none'}`,
+    `Render video: ${result.plan?.render_video ? 'yes' : 'no'}`,
+  ];
+
+  if (artifacts) {
+    lines.push('Artifacts:', artifacts);
+  }
+
+  responseBodyEl.textContent = lines.join('\n');
+}
 
 async function handlePrompt() {
   const text = document.getElementById('textPrompt').value.trim();
@@ -126,44 +215,80 @@ async function handlePrompt() {
   const captionsEnabled = document.getElementById('enableCaptions').checked;
   const realtime = document.getElementById('enableRealtime').checked;
   const hdAudio = document.getElementById('enableHdAudio').checked;
+  const textTemp = Number(document.getElementById('textTemp').value) || 0.7;
+  const waveformTemp = Number(document.getElementById('waveformTemp').value) || 0.7;
+  const outputDir = document.getElementById('outputDir').value.trim();
+  const jobPrefix = document.getElementById('jobPrefix').value.trim();
+  const dryRun = dryRunToggle.checked;
+  const renderVideo = renderVideoToggle.checked;
   if (!text) {
     log('Please add a prompt before synthesizing.', 'warn');
     return;
   }
 
-  log('Queued text prompt for Bark synthesis (mock endpoint).', '1D');
+  const outputPath = jobPrefix
+    ? `${outputDir || 'outputs'}/${jobPrefix}`
+    : outputDir || undefined;
+
+  log('Queued text prompt for Bark synthesis.', '1D');
   log(
     `Targeting ${resolution[0]}×${resolution[1]} @ ${fps}FPS with ${hdAudio ? 'HD' : 'standard'} audio and captions ${
       captionsEnabled ? 'ON' : 'OFF'
     }.`,
     'video'
   );
+  log(
+    `Backend mode: ${dryRun ? 'dry-run planning' : 'full generation'}${
+      renderVideo ? ' + UHD video render' : ''
+    }.`,
+    'api'
+  );
   if (realtime) {
     log('Realtime layered diffusion is active to sync imagery with generated audio.', '4D');
   }
   try {
-    // This stub shows how a backend integration could look.
-    await fetch('/api/bark/synthesize', {
+    const response = await fetch('/api/bark/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         prompt: text,
-        modalities: ['audio', 'video'],
+        caption_text: captionText,
+        modalities: renderVideo ? ['audio', 'video'] : ['audio'],
+        render_video: renderVideo,
+        dry_run: dryRun,
+        output_path: outputPath,
+        text_temp: textTemp,
+        waveform_temp: waveformTemp,
         video: {
           resolution,
           fps,
-          captionsEnabled,
-          captionText,
-          realtimeLayering: realtime,
-          audioBitrate: hdAudio ? '320k' : '160k',
+          enable_captions: captionsEnabled,
+          realtime_layering: realtime,
+          audio_bitrate: hdAudio ? '320k' : '160k',
+          video_bitrate: renderVideo ? '28M' : '10M',
           codec: 'libx264',
-          audioCodec: 'aac',
+          audio_codec: 'aac',
         },
       }),
     });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || 'Request failed');
+    }
     log('Request sent to Bark pipeline.', 'network');
+    updateResponseSummary(data);
+    if (data.status === 'planned') {
+      log('Dry-run complete: received planning response from backend.', 'api');
+    }
+    if (data.artifacts && Object.keys(data.artifacts).length) {
+      const artifactList = Object.keys(data.artifacts)
+        .map((k) => k.toUpperCase())
+        .join(', ');
+      log(`Backend prepared ${artifactList}.`, 'api');
+    }
   } catch (err) {
     log(`Offline stub: ${err.message}`, 'offline');
+    updateResponseSummary(null);
   }
 }
 
@@ -207,11 +332,11 @@ async function connectRtc() {
   try {
     rtcStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
     videoPreview.srcObject = rtcStream;
-    statusEl.textContent = 'RTC Live';
-    statusEl.style.color = 'var(--accent)';
+    setConnectionStatus('RTC Live', 'var(--accent)');
     log('WebRTC capture started — frames can feed Bark temporal stacks.', '4D');
   } catch (err) {
     log(`WebRTC unavailable: ${err.message}`, 'offline');
+    setConnectionStatus('Offline', '#f28b82');
   }
 }
 

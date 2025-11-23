@@ -17,15 +17,18 @@ license = {file = "LICENSE"}
 dependencies = [
     "boto3",
     "encodec",
+    "fastapi",
     "funcy",
     "huggingface-hub>=0.14.1",
     "moviepy",
     "numpy",
+    "pydantic>=1.10",
     "scipy",
     "tokenizers",
     "torch",
     "tqdm",
     "transformers",
+    "uvicorn",
 ]
 
 [project.urls]

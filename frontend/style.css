@@ -306,6 +306,48 @@ input:checked + .slider::before {
   gap: 10px;
 }
 
+.capability-block {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 13px;
+}
+
+.capability-block h3 {
+  margin: 0 0 6px 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.capability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+}
+
+.response-block {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.response-block__title {
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.response-block__body {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
 @media (max-width: 768px) {
   .scene-overlay {
     flex-direction: column;
