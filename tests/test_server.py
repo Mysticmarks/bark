@@ -188,3 +188,40 @@ def test_requires_loaded_models_for_full_generation(tmp_path):
         assert calls == []
     finally:
         cleanup()
+
+
+def test_job_status_for_dry_run_and_missing_job(tmp_path):
+    client, _, cleanup = create_test_client(tmp_path)
+    try:
+        resp = client.post("/api/bark/synthesize", json={"prompt": "dry"})
+        assert resp.status_code == 200
+        job_id = resp.json()["job_id"]
+
+        status_resp = client.get(f"/api/bark/jobs/{job_id}")
+        assert status_resp.status_code == 200
+        status_body = status_resp.json()
+        assert status_body["status"] == "planned"
+        assert status_body["artifacts"] == {}
+        assert status_body["plan"]["prompt_length"] == len("dry")
+
+        missing_resp = client.get("/api/bark/jobs/unknown")
+        assert missing_resp.status_code == 404
+    finally:
+        cleanup()
+
+
+def test_job_status_updates_after_completion(tmp_path):
+    client, calls, cleanup = create_test_client(tmp_path)
+    try:
+        resp = client.post("/api/bark/synthesize", json={"prompt": "status run", "dry_run": False})
+        assert resp.status_code == 200
+        job_id = resp.json()["job_id"]
+
+        status_resp = client.get(f"/api/bark/jobs/{job_id}")
+        assert status_resp.status_code == 200
+        body = status_resp.json()
+        assert body["status"] == "completed"
+        assert Path(body["artifacts"]["audio"]).exists()
+        assert calls == ["status run"]
+    finally:
+        cleanup()
