@@ -133,6 +133,14 @@ class SynthesisResponse(BaseModel):
     artifacts: Dict[str, str] = Field(default_factory=dict)
 
 
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    plan: Dict[str, object]
+    artifacts: Dict[str, str] = Field(default_factory=dict)
+    error: Optional[str] = None
+
+
 app = FastAPI(title="Bark Multimodal Service", version="0.1.0")
 
 
@@ -202,6 +210,13 @@ class QueuedJob:
 _job_queue: asyncio.Queue[QueuedJob] = asyncio.Queue()
 _job_status: Dict[str, Dict[str, Any]] = {}
 _worker_tasks: List[asyncio.Task] = []
+
+
+def _get_job_status(job_id: str) -> Dict[str, Any]:
+    try:
+        return _job_status[job_id]
+    except KeyError:
+        raise ServiceError("Unknown job_id", status.HTTP_404_NOT_FOUND)
 
 
 async def _auth_dependency(config: ServiceConfig = Depends(get_service_config), api_key: Optional[str] = Header(None, alias="X-API-Key")) -> None:
@@ -382,6 +397,7 @@ async def synthesize(payload: SynthesisRequest, config: ServiceConfig = Depends(
     }
 
     if payload.dry_run:
+        _job_status[job_id] = {"status": "planned", "plan": plan, "artifacts": {}}
         return SynthesisResponse(job_id=job_id, status="planned", plan=plan)
 
     if not config.models_ready:
@@ -393,7 +409,7 @@ async def synthesize(payload: SynthesisRequest, config: ServiceConfig = Depends(
     loop = asyncio.get_running_loop()
     future: asyncio.Future[Dict[str, str]] = loop.create_future()
     job = QueuedJob(job_id=job_id, payload=payload, plan=plan, future=future)
-    _job_status[job_id] = {"status": "queued", "plan": plan}
+    _job_status[job_id] = {"status": "queued", "plan": plan, "artifacts": {}}
     _emit_hook(config.log_hook, "job_queued", {"job_id": job_id})
 
     try:
@@ -409,6 +425,20 @@ async def synthesize(payload: SynthesisRequest, config: ServiceConfig = Depends(
         raise ServiceError(f"Generation failed: {exc}", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return SynthesisResponse(job_id=job_id, status=_job_status[job_id]["status"], plan=plan, artifacts=artifacts)
+
+
+@app.get("/api/bark/jobs/{job_id}", response_model=JobStatusResponse, dependencies=[Depends(_auth_dependency), Depends(_rate_limit_dependency)])
+async def job_status(job_id: str) -> JobStatusResponse:
+    """Retrieve the latest status and artifacts for a previously submitted job."""
+
+    status_data = _get_job_status(job_id)
+    return JobStatusResponse(
+        job_id=job_id,
+        status=status_data.get("status", "unknown"),
+        plan=status_data.get("plan", {}),
+        artifacts=status_data.get("artifacts", {}),
+        error=status_data.get("error"),
+    )
 
 
 def create_app() -> FastAPI:

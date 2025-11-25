@@ -73,6 +73,7 @@ sequenceDiagram
 | `/api/health` | GET | Liveness check; returns version and UTC timestamp. | None | `{ status, time, version }` |
 | `/api/capabilities` | GET | Advertises supported modalities and presets. | None | `{ modalities, video_presets, audio_bitrates, codecs, notes }` |
 | `/api/bark/synthesize` | POST | Plan or execute Bark synthesis. Applies auth, rate limit, and queue admission. | `SynthesisRequest` | `SynthesisResponse` with `status`, `plan`, `artifacts` |
+| `/api/bark/jobs/{job_id}` | GET | Retrieve latest job metadata after submission (planned, queued, running, completed, failed). | `job_id` path param | `JobStatusResponse` mirrors `SynthesisResponse` fields with optional `error` |
 
 #### `SynthesisRequest`
 - `prompt` (str, required): text to synthesize.
@@ -90,6 +91,11 @@ sequenceDiagram
 - `status` (str): one of `planned`, `queued`, `running`, `completed`, `failed`.
 - `plan` (object): echo of input-driven planning metadata.
 - `artifacts` (dict[str, str]): absolute or relative paths to generated WAV/MP4/captions (empty on dry-run or failure).
+- Dry-run submissions are recorded in memory so clients can still call `/api/bark/jobs/{job_id}` for plan confirmation.
+
+#### `JobStatusResponse`
+- `job_id`, `status`, `plan`, `artifacts` as above; `error` contains a human-readable string when a job fails.
+- Returns `404` when an unknown `job_id` is requested.
 
 #### Error Conditions
 - `400` on validation (empty prompt, unsafe output path) or malformed input.

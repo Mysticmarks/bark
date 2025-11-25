@@ -48,6 +48,7 @@ dev = [
     "nbformat",
     "pydocstyle",
     "pylint",
+    "httpx",
     "pytest",
     "pytest-cov",
 ]
