@@ -191,6 +191,7 @@ _CAPABILITIES = CapabilityResponse(
     notes=[
         "Set dry_run=false to trigger full synthesis when models are installed.",
         "render_video=true will automatically attach captions based on your prompt.",
+        "Roadmap: multi-stem audio (voices, SFX, music, ensemble) with long-form timelines up to 120 minutes.",
     ],
 )
 
